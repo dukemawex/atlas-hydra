@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from atlas import Atlas
 app=FastAPI(title="Atlas")
+@app.get('/',response_class=HTMLResponse)
+async def home(): return Path('static/index.html').read_text()
 atlas=Atlas()
 class Project(BaseModel): name:str
 class Alias(BaseModel): value:str
