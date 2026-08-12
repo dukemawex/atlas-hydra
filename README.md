@@ -11,6 +11,16 @@ python -m venv .venv && .venv/bin/pip install -e .
 HYDRA_URL=http://127.0.0.1:8443 .venv/bin/python demo.py
 ```
 
+## Built on the HydraDB open-source repo
+
+This repository pins the HydraDB OS source as `vendor/hydradb` via a Git submodule. The hosted API is the default demo runtime; the pinned source is the local/self-hosted runtime and the reference for the graph model and OpenCypher behavior.
+
+```bash
+git clone --recurse-submodules <this-repository-url>
+# or, after cloning:
+git submodule update --init --recursive
+```
+
 ## HydraDB is core
 
 Atlas uses HydraDB as the source of truth for `Person`, `Project`, `Document`, `Claim`, and `Decision` nodes and their `OWNS`, `ABOUT`, `SUPPORTS`, `CONTRADICTS`, and `SUPERSEDES` edges. Its answer path is a bounded OpenCypher traversal, not a vector lookup.
