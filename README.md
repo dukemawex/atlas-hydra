@@ -27,3 +27,7 @@ Atlas uses HydraDB as the source of truth for `Person`, `Project`, `Document`, `
 
 HydraDB: https://github.com/hydra-db/hydradb
 Hack Hydra: https://hackhydra.hydradb.com
+
+## What Atlas loses without HydraDB
+
+Atlas writes structured enterprise records through HydraDB `app_knowledge` and retrieves with HydraDB graph context enabled. HydraDB is responsible for entity/relation extraction and evidence paths across aliases, projects, claims, and source documents. Without it, Atlas becomes a flat document search tool: it cannot resolve `@sam` to a canonical person, traverse ownership, compare contradictory claims, or show why one claim supersedes another.

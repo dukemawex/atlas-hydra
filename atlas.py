@@ -78,6 +78,10 @@ class Atlas:
         """)
 
     async def aliases(self, value: str):
+        if self.hosted:
+            return await self.cypher(
+                f"Which canonical person does the alias {value} resolve to? Show the RESOLVES_TO evidence path and source."
+            )
         return await self.cypher(f"""
         MATCH (a:PersonAlias {{value:{lit(value)}}})-[:RESOLVES_TO]->(p:Person)
         RETURN p.canonical AS canonical
