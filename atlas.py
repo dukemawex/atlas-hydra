@@ -20,6 +20,20 @@ class Atlas:
     def hosted(self) -> bool:
         return self.base.startswith("https://")
 
+    async def ingest_app_knowledge(self, items: list[dict]) -> dict:
+        if not self.hosted: raise RuntimeError("app_knowledge ingestion requires hosted HydraDB v2")
+        import json
+        files={"app_knowledge":(None,json.dumps(items))}
+        data={"type":"knowledge","database":self.graph,"collection":self.collection,"upsert":"true"}
+        async with httpx.AsyncClient(timeout=30) as c:
+            r=await c.post(f"{self.base.rstrip('/')}/context/ingest",headers={"Authorization":f"Bearer {self.token}","API-Version":"2"},data=data,files=files); r.raise_for_status(); return r.json()
+
+    async def ingest_records(self, records: list[dict]) -> dict:
+        items=[]
+        for record in records:
+            items.append({"id":record["id"],"database":self.graph,"collection":self.collection,"title":record.get("title",record["id"]),"type":record.get("type","enterprise_record"),"content":{"text":record["text"]},"metadata":record.get("metadata",{}),"additional_metadata":{"source":"atlas"}})
+        return await self.ingest_app_knowledge(items)
+
     async def ingest_text(self, text: str, title: str = "atlas-demo") -> dict:
         import json
         files = {"memories": (None, json.dumps([{"text": text, "infer": False, "title": title}]))}
