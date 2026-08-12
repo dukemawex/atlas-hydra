@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from pathlib import Path
 from pydantic import BaseModel
 from atlas import Atlas
 app=FastAPI(title="Atlas")
