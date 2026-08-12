@@ -14,13 +14,31 @@ class Atlas:
     token: str = os.getenv("HYDRA_TOKEN", "local-development-token-32-bytes")
     graph: str = os.getenv("HYDRA_GRAPH", "default")
     cell: str = os.getenv("HYDRA_CELL", "cell-0")
+    collection: str = os.getenv("HYDRA_COLLECTION", "atlas")
+
+    @property
+    def hosted(self) -> bool:
+        return self.base.startswith("https://")
+
+    async def ingest_text(self, text: str, title: str = "atlas-demo") -> dict:
+        import json
+        files = {"memories": (None, json.dumps([{"text": text, "infer": False, "title": title}]))}
+        data = {"type": "memory", "database": self.graph, "collection": self.collection, "upsert": "true"}
+        headers = {"Authorization": f"Bearer {self.token}", "API-Version": "2"}
+        async with httpx.AsyncClient(timeout=30) as c:
+            r = await c.post(f"{self.base.rstrip('/')}/context/ingest", headers=headers, data=data, files=files); r.raise_for_status(); return r.json()
 
     async def cypher(self, query: str) -> dict:
         async with httpx.AsyncClient(timeout=30) as c:
-            r = await c.post(f"{self.base}/v1/graphs/{self.graph}/query", headers={"Authorization": f"Bearer {self.token}", "X-Graph-Namespace": "default"}, json={"cell_id": self.cell, "query": query})
+            if self.hosted:
+                r = await c.post(f"{self.base.rstrip('/')}/query", headers={"Authorization": f"Bearer {self.token}", "API-Version": "2"}, json={"database": self.graph, "collection": self.collection, "query": query, "type": "all", "mode": "thinking", "graph_context": True})
+            else:
+                r = await c.post(f"{self.base}/v1/graphs/{self.graph}/query", headers={"Authorization": f"Bearer {self.token}", "X-Graph-Namespace": "default"}, json={"cell_id": self.cell, "query": query})
             r.raise_for_status(); return r.json()
 
     async def ingest_fixture(self):
+        if self.hosted:
+            return await self.ingest_text("""Atlas fixture: Sam, @sam, and S. Ratnaparkhi are the same person. Sam owns Phoenix. A Slack claim says Phoenix is ready to launch, but a later Drive claim says Phoenix is blocked on security review. The later claim supersedes the earlier claim. Apollo ownership is not present in this fixture.""", "atlas-enterprise-demo")
         return await self.cypher("""
         CREATE
         (sam:Person {id:'p-sam', canonical:'Sam Ratnaparkhi'}),
