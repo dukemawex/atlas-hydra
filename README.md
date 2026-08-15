@@ -40,3 +40,7 @@ uvicorn app:app --reload
 ```
 
 Open `http://127.0.0.1:8000`. The UI calls HydraDB-backed alias and conflict-resolution routes.
+
+## Submission demo
+
+Atlas MVP demo video: `Atlas-MVP.mp4`.

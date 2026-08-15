@@ -1,0 +1,13 @@
+This is Atlas, a graph-native enterprise context and ontology system for Hack Hydra Track 1.
+
+The problem is that enterprise knowledge is noisy. The same person can appear as Sam, at-sam, or S. Ratnaparkhi. Project updates can contradict one another. Document search can find both claims, but it cannot reliably resolve identity, determine which claim is current, or explain the decision path.
+
+I built Atlas as a FastAPI application with a judge-facing web interface. It ingests enterprise records, resolves aliases to canonical entities, compares contradictory claims, follows superseding relationships, and explicitly returns NOT_FOUND when the knowledge base does not support an answer.
+
+Here is the working demo. The fixture contains the alias Sam and at-sam, a Phoenix project, and conflicting project-status claims. Atlas sends the structured records into HydraDB, then queries the graph. The alias query resolves at-sam to the canonical person Sam. The project query returns the current security-review status together with the supporting evidence. If we ask who owns Project Apollo, which is absent from the fixture, Atlas returns NOT_FOUND instead of inventing an answer.
+
+HydraDB is the core of Atlas. Its graph contains Person, Project, Document, Claim, and Decision nodes with OWNS, ABOUT, SUPPORTS, CONTRADICTS, and SUPERSEDES edges. HydraDB performs graph-aware retrieval and returns the evidence paths. That is what lets Atlas resolve aliases, prefer a superseding claim, and distinguish a supported answer from a missing fact.
+
+Without HydraDB, Atlas becomes flat document search. It loses entity resolution, contradiction handling, temporal truth, and provenance. The graph is not an add-on; it is the product.
+
+Atlas is open source, includes the HydraDB OS submodule, has local setup instructions, and exposes a working hosted-API demo. Thank you.
